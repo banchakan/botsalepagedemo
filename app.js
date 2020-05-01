@@ -13,30 +13,39 @@ app.post('/webhook', (req, res) => {
 })
 app.listen(port)
 
-function reply(reply_token, data_req) {
+function reply(reply_token, mes) {
     let headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer {XdnwLY7GgF/eWd1Uy8nPCThmPtS9DfxU9wJU/MErEz3NwmCJ8TGX6Op35C4CczUTEHY1rlrTEzaiETLiqevZgdgiYk9Ds04TeYPEWXs2TqEqfKiGb3GqsOC+ovynf4mXVFFVbCLftNUC35+SgEuMdQdB04t89/1O/w1cDnyilFU=}'
     }
-    
 
-    let body = JSON.stringify({
-        replyToken: reply_token,
-        messages: [
-            {
-                type: 'text',
-                text: 'Hello'
-            },
-            {
-                type: 'text',
-                text: 'How are you?'
-            },
-            {
-                type: 'text',
-                text: data_req.text
-            }
-        ]
-    })
+    let body = null
+    if(mes.text.includes('NewOrder')){
+        body = JSON.stringify({
+            replyToken: reply_token,
+            messages: [
+                {
+                    type: 'text',
+                    text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Lacation) เพื่อยืนยันออเดอร์'
+                }
+            ]
+        })
+    }else{
+        body = JSON.stringify({
+            replyToken: reply_token,
+            messages: [
+                {
+                    type: 'text',
+                    text: 'กรุณารอสักครู่ Admin กำลังตรวจสอบ..'
+                },
+                {
+                    type: 'text',
+                    text: `Type Message = ${mes.type}`
+                },
+            ]
+        })
+    }
+    
     request.post({
         url: 'https://api.line.me/v2/bot/message/reply',
         headers: headers,
