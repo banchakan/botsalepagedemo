@@ -20,28 +20,36 @@ function reply(reply_token, mes) {
     }
 
     let body = null
-    if(mes.text.includes('NewOrder')){
-        body = JSON.stringify({
-            replyToken: reply_token,
-            messages: [
-                {
-                    type: 'text',
-                    text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Lacation) เพื่อยืนยันออเดอร์'
-                }
-            ]
-        })
+    if(mes.type === 'text'){
+        if(mes.text.includes('NewOrder')){
+            body = JSON.stringify({
+                replyToken: reply_token,
+                messages: [
+                    {
+                        type: 'text',
+                        text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Lacation) เพื่อยืนยันออเดอร์'
+                    }
+                ]
+            })
+        }else{
+            body = JSON.stringify({
+                replyToken: reply_token,
+                messages: [
+                    {
+                        type: 'text',
+                        text: 'กรุณารอสักครู่ Admin กำลังตรวจสอบ..'
+                    }
+                ]
+            })
+        }
     }else{
         body = JSON.stringify({
             replyToken: reply_token,
             messages: [
                 {
                     type: 'text',
-                    text: 'กรุณารอสักครู่ Admin กำลังตรวจสอบ..'
-                },
-                {
-                    type: 'text',
                     text: `Type Message = ${mes.type}`
-                },
+                }
             ]
         })
     }
