@@ -27,7 +27,7 @@ function reply(reply_token, mes) {
                 messages: [
                     {
                         type: 'text',
-                        text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Lacation) เพื่อยืนยันออเดอร์'
+                        text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Location) เพื่อยืนยันออเดอร์'
                     }
                 ]
             })
@@ -42,13 +42,23 @@ function reply(reply_token, mes) {
                 ]
             })
         }
+    }else if(mes.type === 'location'){
+        body = JSON.stringify({
+            replyToken: reply_token,
+            messages: [
+                {
+                    type: 'text',
+                    text: `คุณได้สั่งออเดอร์แล้ว โปรดรอการจัดส่ง`
+                }
+            ]
+        })
     }else{
         body = JSON.stringify({
             replyToken: reply_token,
             messages: [
                 {
                     type: 'text',
-                    text: `Type Message = ${mes.type}`
+                    text: `ชนิดข้อความ > ${mes.type}`
                 }
             ]
         })
