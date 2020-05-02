@@ -10,7 +10,7 @@ app.post('/webhook', (req, res) => {
     let reply_token = req.body.events[0].replyToken
     reply(reply_token, req.body.events[0].message)
     //res.sendStatus(200)
-    res.json(req.body.events)
+    res.json(200)
 })
 app.listen(port)
 
@@ -23,14 +23,28 @@ function reply(reply_token, mes) {
     let body = null
     if(mes.type === 'text'){
         if(mes.text.includes('NewOrder')){
-            body = JSON.stringify({
-                replyToken: reply_token,
-                messages: [
-                    {
-                        type: 'text',
-                        text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Location) เพื่อยืนยันออเดอร์'
-                    }
-                ]
+            notifyMessage(mes.text).then(res_body => {
+                if(res_body.status === 200){
+                    body = JSON.stringify({
+                        replyToken: reply_token,
+                        messages: [
+                            {
+                                type: 'text',
+                                text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Location) เพื่อยืนยันออเดอร์'
+                            }
+                        ]
+                    })
+                }else{
+                    body = JSON.stringify({
+                        replyToken: reply_token,
+                        messages: [
+                            {
+                                type: 'text',
+                                text: 'เกิดข้อผิดพลาดในการสั่งซื้อ..'
+                            }
+                        ]
+                    })
+                }
             })
         }else{
             body = JSON.stringify({
@@ -38,7 +52,7 @@ function reply(reply_token, mes) {
                 messages: [
                     {
                         type: 'text',
-                        text: 'กรุณารอสักครู่ Admin กำลังตรวจสอบ..'
+                        text: 'หนูเป็น bot หนูตอบไม่ได้..'
                     }
                 ]
             })
@@ -54,15 +68,15 @@ function reply(reply_token, mes) {
             ]
         })
     }else{
-        body = JSON.stringify({
-            replyToken: reply_token,
-            messages: [
-                {
-                    type: 'text',
-                    text: `ชนิดข้อความ > ${mes.type}`
-                }
-            ]
-        })
+        // body = JSON.stringify({
+        //     replyToken: reply_token,
+        //     messages: [
+        //         {
+        //             type: 'text',
+        //             text: `หนูเป็น bot หนูตอบไม่ได้..`
+        //         }
+        //     ]
+        // })
     }
     
     request.post({
@@ -72,4 +86,22 @@ function reply(reply_token, mes) {
     }, (err, res, body) => {
         console.log('status = ' + res.statusCode);
     });
+}
+
+function notifyMessage(text){
+    return new Promise((resolve,reject) => {
+        request({
+            method: 'POST',
+            uri: 'https://notify-api.line.me/api/notify',
+            header: {'Content-Type': 'application/x-www-form-urlencoded'},
+            auth: {bearer: '3iEMFExWiRAUpKfW8ZAA59KR44BEDdVpG18SYCVSZMj'},
+            form: {message: text,},
+        }, (err, httpResponse, body) => {
+            if (err) {
+                reject(null)
+            } else {
+                resolve(body)
+            }
+          })
+    })
 }
