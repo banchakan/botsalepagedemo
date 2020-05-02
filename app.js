@@ -100,8 +100,8 @@ function notifyMessage(text){
             if (err) {
                 reject(null)
             } else {
-                resolve(body)
+                resolve(JSON.parse(body))
             }
-          })
+        })
     })
 }
