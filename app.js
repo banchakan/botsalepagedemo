@@ -112,57 +112,36 @@ function createMessage(reply_token, mes, userId) {
                 }
             }
             api.post('/setLocationOrder', model)
-            .then(result => {
-                body = JSON.stringify({
-                    replyToken: reply_token,
-                    messages: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result.data)
-                        }
-                    ]
-                })
-                resolve(body)
-                
-                // if(result){
-                //     updateOrderNotifyMessage(result).then(text => {
-                //         notifyMessage(text).then(re => {
-                //             body = JSON.stringify({
-                //                 replyToken: reply_token,
-                //                 messages: [
-                //                     {
-                //                         type: 'text',
-                //                         text: `คุณได้สั่งออเดอร์แล้ว โปรดรอการจัดส่ง`
-                //                     }
-                //                 ]
-                //             })
-                //             resolve(body)
-                //         })
-                //     }) 
-                // }else{
-                //     body = JSON.stringify({
-                //         replyToken: reply_token,
-                //         messages: [
-                //             {
-                //                 type: 'text',
-                //                 text: `บันทึกข้อมูลผิดพลาด..`
-                //             }
-                //         ]
-                //     })
-                //     resolve(body)
-                // }
+            .then(result => {                
+                if(result){
+                    updateOrderNotifyMessage(result.data).then(text => {
+                        notifyMessage(text).then(re => {
+                            body = JSON.stringify({
+                                replyToken: reply_token,
+                                messages: [
+                                    {
+                                        type: 'text',
+                                        text: `คุณได้สั่งออเดอร์แล้ว โปรดรอการจัดส่ง`
+                                    }
+                                ]
+                            })
+                            resolve(body)
+                        })
+                    }) 
+                }else{
+                    body = JSON.stringify({
+                        replyToken: reply_token,
+                        messages: [
+                            {
+                                type: 'text',
+                                text: `บันทึกข้อมูลผิดพลาด..`
+                            }
+                        ]
+                    })
+                    resolve(body)
+                }
             }).catch(err => {
                 //error
-                body = JSON.stringify({
-                    replyToken: reply_token,
-                    messages: [
-                        {
-                            type: 'text',
-                            text: `catch error....${err}`
-                        }
-                    ]
-                })
-                resolve(body)
             })  
         }
     })
