@@ -10,9 +10,25 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
     replyMessage(req.body)
+    //testapi(req.body.data)
     res.json(200)
 })
 app.listen(port)
+
+function testapi(data){
+    let model = {
+        data: {
+            userId: data.userId,
+            message: data.message
+        }
+    }
+    api.post('/setLocationOrder', model)
+    .then(result => {
+        console.log(result.data)
+    }).catch(err => {
+        console.log(err)
+    })  
+}
 
 function replyMessage(body){
     let reply_token = body.events[0].replyToken
@@ -102,7 +118,7 @@ function createMessage(reply_token, mes, userId) {
                     messages: [
                         {
                             type: 'text',
-                            text: JSON.stringify(result)
+                            text: JSON.stringify(result.data)
                         }
                     ]
                 })
@@ -142,7 +158,7 @@ function createMessage(reply_token, mes, userId) {
                     messages: [
                         {
                             type: 'text',
-                            text: `catch error..`
+                            text: `catch error....${err}`
                         }
                     ]
                 })
