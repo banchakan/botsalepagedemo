@@ -10,7 +10,6 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
     replyMessage(req.body)
-    //testAPI(req.body.data)
     res.json(200)
 })
 app.listen(port)
@@ -43,18 +42,16 @@ function createMessage(reply_token, mes, userId) {
             if(mes.text.includes('New Order No.')){
                 notifyMessage(mes.text).then(notify_result => {
                     if(notify_result.status === 200){
-                        //findOrderIdByMessageNewOrder(mes.text).then(orderId => {
-                            body = JSON.stringify({
-                                replyToken: reply_token,
-                                messages: [
-                                    {
-                                        type: 'text',
-                                        text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Location) เพื่อยืนยันออเดอร์'
-                                    }
-                                ]
-                            })
-                            resolve(body)
-                        //})
+                        body = JSON.stringify({
+                            replyToken: reply_token,
+                            messages: [
+                                {
+                                    type: 'text',
+                                    text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Location) เพื่อยืนยันออเดอร์'
+                                }
+                            ]
+                        })
+                        resolve(body)
                     }else{
                         body = JSON.stringify({
                             replyToken: reply_token,
@@ -112,25 +109,6 @@ function createMessage(reply_token, mes, userId) {
     })
 }
 
-function testAPI(msg){
-    findOrderIdByMessageNewOrder(msg).then(text => {
-        console.log(text)
-    })
-}
-
-function findOrderIdByMessageNewOrder(msg){
-    return new Promise((resolve,reject) => {
-        let orderId = null
-        let text = msg.split('ชื่อ')[0].split(' ')
-        text.forEach(sub_text => {
-            if(Number(sub_text)){
-                orderId = sub_text
-            }
-        })
-        resolve(orderId)
-    })
-}
-
 function updateOrderNotifyMessage(order){
     return new Promise((resolve,reject) => {
         let title = `Update Order No. ${order.orderId}\n`
@@ -164,3 +142,46 @@ function notifyMessage(text){
         })
     })
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function findOrderIdByMessageNewOrder(msg){
+    return new Promise((resolve,reject) => {
+        let orderId = null
+        let text = msg.split('ชื่อ')[0].split(' ')
+        text.forEach(sub_text => {
+            if(Number(sub_text)){
+                orderId = sub_text
+            }
+        })
+        resolve(orderId)
+    })
+}
+
+
+
