@@ -45,7 +45,7 @@ function createMessage(reply_token, mes, userId) {
                     messages: [
                         {
                             type: 'text',
-                            text: mes.text
+                            text: 'if => '+mes.text
                         }
                     ]
                 })
@@ -92,7 +92,7 @@ function createMessage(reply_token, mes, userId) {
                     messages: [
                         {
                             type: 'text',
-                            text: mes.text
+                            text: 'else => '+mes.text
                         }
                     ]
                 })
