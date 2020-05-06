@@ -9,7 +9,8 @@ const api = require('./config/createInstance');
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
-    replyMessage(req.body)
+    //replyMessage(req.body)
+    testAPI(req.body.data)
     res.json(200)
 })
 app.listen(port)
@@ -40,51 +41,32 @@ function createMessage(reply_token, mes, userId) {
         let body = null
         if(mes.type === 'text'){
             if(mes.text.includes('New Order No.')){
-                findOrderIdByMessageNewOrder(mes.text).then(orderId => {
-                    body = JSON.stringify({
-                        replyToken: reply_token,
-                        messages: [
-                            {
-                                type: 'text',
-                                text: 'IF => '+ orderId
-                            }
-                        ]
-                    })
-                    resolve(body)
-                    // api.post('/getOrderById', {data: {orderId: orderId}})
-                    // .then(order_result => {
-                    //     if(order_result.data){
-                    //         notifyMessage(mes.text).then(notify_result => {
-                    //             if(notify_result.status === 200){
-                    //                 body = JSON.stringify({
-                    //                     replyToken: reply_token,
-                    //                     messages: [
-                    //                         {
-                    //                             type: 'text',
-                    //                             text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Location) เพื่อยืนยันออเดอร์'
-                    //                         }
-                    //                     ]
-                    //                 })
-                    //                 resolve(body)
-                    //             }else{
-                    //                 body = JSON.stringify({
-                    //                     replyToken: reply_token,
-                    //                     messages: [
-                    //                         {
-                    //                             type: 'text',
-                    //                             text: 'เกิดข้อผิดพลาดในการสั่งซื้อ..'
-                    //                         }
-                    //                     ]
-                    //                 })
-                    //                 resolve(body)
-                    //             }
-                    //         })
-                    //     }else{
-                    //         //ไม่พบข้อมูล
-                    //     }
-                    // }).catch(err => {
-                    //     //error
-                    // })
+                notifyMessage(mes.text).then(notify_result => {
+                    if(notify_result.status === 200){
+                        //findOrderIdByMessageNewOrder(mes.text).then(orderId => {
+                            body = JSON.stringify({
+                                replyToken: reply_token,
+                                messages: [
+                                    {
+                                        type: 'text',
+                                        text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Location) เพื่อยืนยันออเดอร์'
+                                    }
+                                ]
+                            })
+                            resolve(body)
+                        //})
+                    }else{
+                        body = JSON.stringify({
+                            replyToken: reply_token,
+                            messages: [
+                                {
+                                    type: 'text',
+                                    text: 'เกิดข้อผิดพลาดในการสั่งซื้อ..'
+                                }
+                            ]
+                        })
+                        resolve(body)
+                    }
                 })
             }
         }else if(mes.type === 'location'){
@@ -130,10 +112,21 @@ function createMessage(reply_token, mes, userId) {
     })
 }
 
+function testAPI(msg){
+    findOrderIdByMessageNewOrder(msg).then(text => {
+        console.log(text)
+    })
+}
+
 function findOrderIdByMessageNewOrder(msg){
     return new Promise((resolve,reject) => {
-        let text = msg.split('ชื่อ')[0]
-        let orderId = text.split('New Order NO.')[1]
+        let orderId = null
+        let text = msg.split('ชื่อ')[0].split(' ')
+        text.forEach(sub_text => {
+            if(Number(sub_text)){
+                orderId = sub_text
+            }
+        })
         resolve(orderId)
     })
 }
