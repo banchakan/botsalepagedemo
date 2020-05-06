@@ -9,8 +9,8 @@ const api = require('./config/createInstance');
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
-    //replyMessage(req.body)
-    testAPI(req.body.data)
+    replyMessage(req.body)
+    //testAPI(req.body.data)
     res.json(200)
 })
 app.listen(port)
