@@ -40,63 +40,52 @@ function createMessage(reply_token, mes, userId) {
         let body = null
         if(mes.type === 'text'){
             if(mes.text.includes('New Order No.')){
-                body = JSON.stringify({
-                    replyToken: reply_token,
-                    messages: [
-                        {
-                            type: 'text',
-                            text: 'if => '+mes.text
-                        }
-                    ]
+                findOrderIdByMessageNewOrder(mes.text).then(orderId => {
+                    body = JSON.stringify({
+                        replyToken: reply_token,
+                        messages: [
+                            {
+                                type: 'text',
+                                text: 'IF => '+ orderId
+                            }
+                        ]
+                    })
+                    resolve(body)
+                    // api.post('/getOrderById', {data: {orderId: orderId}})
+                    // .then(order_result => {
+                    //     if(order_result.data){
+                    //         notifyMessage(mes.text).then(notify_result => {
+                    //             if(notify_result.status === 200){
+                    //                 body = JSON.stringify({
+                    //                     replyToken: reply_token,
+                    //                     messages: [
+                    //                         {
+                    //                             type: 'text',
+                    //                             text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Location) เพื่อยืนยันออเดอร์'
+                    //                         }
+                    //                     ]
+                    //                 })
+                    //                 resolve(body)
+                    //             }else{
+                    //                 body = JSON.stringify({
+                    //                     replyToken: reply_token,
+                    //                     messages: [
+                    //                         {
+                    //                             type: 'text',
+                    //                             text: 'เกิดข้อผิดพลาดในการสั่งซื้อ..'
+                    //                         }
+                    //                     ]
+                    //                 })
+                    //                 resolve(body)
+                    //             }
+                    //         })
+                    //     }else{
+                    //         //ไม่พบข้อมูล
+                    //     }
+                    // }).catch(err => {
+                    //     //error
+                    // })
                 })
-                resolve(body)
-                // findOrderIdByMessageNewOrder(mes.text).then(orderId => {
-                //     api.post('/getOrderById', {data: {orderId: orderId}})
-                //     .then(order_result => {
-                //         if(order_result.data){
-                //             notifyMessage(mes.text).then(notify_result => {
-                //                 if(notify_result.status === 200){
-                //                     body = JSON.stringify({
-                //                         replyToken: reply_token,
-                //                         messages: [
-                //                             {
-                //                                 type: 'text',
-                //                                 text: 'กรุณาแชร์ตำแหน่งที่ตั้ง (Location) เพื่อยืนยันออเดอร์'
-                //                             }
-                //                         ]
-                //                     })
-                //                     resolve(body)
-                //                 }else{
-                //                     body = JSON.stringify({
-                //                         replyToken: reply_token,
-                //                         messages: [
-                //                             {
-                //                                 type: 'text',
-                //                                 text: 'เกิดข้อผิดพลาดในการสั่งซื้อ..'
-                //                             }
-                //                         ]
-                //                     })
-                //                     resolve(body)
-                //                 }
-                //             })
-                //         }else{
-                //             //ไม่พบข้อมูล
-                //         }
-                //     }).catch(err => {
-                //         //error
-                //     })
-                // })
-            }else{
-                body = JSON.stringify({
-                    replyToken: reply_token,
-                    messages: [
-                        {
-                            type: 'text',
-                            text: 'else => '+mes.text
-                        }
-                    ]
-                })
-                resolve(body)
             }
         }else if(mes.type === 'location'){
             let model = {
