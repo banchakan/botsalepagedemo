@@ -73,38 +73,42 @@ function createMessage(reply_token, mes, userId) {
                     message: mes
                 }
             }
-            api.post('/setLocationOrder', model)
-            .then(result => {                
-                if(result){
-                    updateOrderNotifyMessage(result.data).then(text => {
-                        notifyMessage(text).then(re => {
+            api.post('/checkOrder', {data: model.data.userId}).then(status => {
+                if(status.data){
+                    api.post('/setLocationOrder', model)
+                    .then(result => {                
+                        if(result){
+                            updateOrderNotifyMessage(result.data).then(text => {
+                                notifyMessage(text).then(re => {
+                                    body = JSON.stringify({
+                                        replyToken: reply_token,
+                                        messages: [
+                                            {
+                                                type: 'text',
+                                                text: `คุณได้สั่งออเดอร์แล้ว โปรดรอการจัดส่ง`
+                                            }
+                                        ]
+                                    })
+                                    resolve(body)
+                                })
+                            }) 
+                        }else{
                             body = JSON.stringify({
                                 replyToken: reply_token,
                                 messages: [
                                     {
                                         type: 'text',
-                                        text: `คุณได้สั่งออเดอร์แล้ว โปรดรอการจัดส่ง`
+                                        text: `บันทึกข้อมูลผิดพลาด..`
                                     }
                                 ]
                             })
                             resolve(body)
-                        })
-                    }) 
-                }else{
-                    body = JSON.stringify({
-                        replyToken: reply_token,
-                        messages: [
-                            {
-                                type: 'text',
-                                text: `บันทึกข้อมูลผิดพลาด..`
-                            }
-                        ]
-                    })
-                    resolve(body)
+                        }
+                    }).catch(err => {
+                        //error
+                    })  
                 }
-            }).catch(err => {
-                //error
-            })  
+            })
         }
     })
 }
