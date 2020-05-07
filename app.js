@@ -74,7 +74,7 @@ function createMessage(reply_token, mes, userId) {
                 }
             }
             api.post('/checkOrder', {data: model.data.userId}).then(status => {
-                if(status.data){
+                if(status.data === false){
                     api.post('/setLocationOrder', model)
                     .then(result => {                
                         if(result){
