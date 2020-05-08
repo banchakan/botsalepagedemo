@@ -116,7 +116,8 @@ function createMessage(reply_token, mes, userId) {
 function updateOrderNotifyMessage(order){
     return new Promise((resolve,reject) => {
         let title = `Update Order No. ${order.orderId}\n`
-        let user = `ชื่อ: ${order.name}\nเบอร์โทร: ${order.tel}\nอีเมล์: ${order.email}\n`
+        //let user = `ชื่อ: ${order.name}\nเบอร์โทร: ${order.tel}\nอีเมล์: ${order.email}\n`
+        let user = `ชื่อ: ${order.name}\nเบอร์โทร: ${order.tel}\n`
         let address = ''
         if(order.addressTitle){
             address = `**ที่อยู่\n${order.addressTitle}\n${order.addressDetail}\n`
