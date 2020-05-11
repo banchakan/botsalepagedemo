@@ -17,9 +17,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
     replyMessage(req.body)
-    test(req.body.data)
-    res.json(200)
-    
+    res.json(200)  
 })
 app.post('/social', (req, res) => {
     let message = req.body.data
@@ -60,10 +58,30 @@ function replyMessage(body){
             });
         }).catch(err => {
             //การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด
+            testMessage('การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด',replyToken)
         })
-    }).catch(err => {
+    }).catch(text => {
         //err ดูในเมธอด checkMessage => reject
+        testMessage(text,replyToken)
     })
+}
+
+function testMessage(text,replyToken){
+    request.post({
+        url: LINE_MESSAGING_API,
+        headers: LINE_HEADER,
+        body: body = JSON.stringify({
+            replyToken: replyToken,
+            messages: [
+                {
+                    type: 'text',
+                    text: text
+                }
+            ]
+        })
+    }, (err, res, body) => {
+        console.log('status = ' + res.statusCode);
+    });
 }
 
 function checkMessage(msg){
@@ -77,20 +95,20 @@ function checkMessage(msg){
                             resolve(true)
                         }else{
                             //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
-                            reject(null)
+                            reject('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
                         }
                     }).catch(err => {
                         //ไม่พบรายการสั่งซื้อ
-                        reject(null)
+                        reject('ไม่พบรายการสั่งซื้อ')
                     })
                 })
             }else{
                 //ข้อความอื่น ๆ
-                reject(null)
+                reject('ข้อความอื่น ๆ')
             }
         }else{
             //ลูกค้าไม่ได้ส่งเป็น text
-            reject(null)
+            reject('ลูกค้าไม่ได้ส่งเป็น text')
         }
     })
 }
