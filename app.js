@@ -127,13 +127,14 @@ function getPomasterId(msg){
     return new Promise((resolve,reject) => {
         let poId = null
         let array = msg.split('เวลารับสินค้า')[0].split(' ')
-        array.forEach(val => {
-            let isnum = /^\d+$/.test(val)
-            if(isnum){
-                poId = Number(val)
+        for(let i = 0 ; i < array.length ; i++){
+            let isnum = /^\d+$/.test(array[i])
+            if(isnum === true){
+                poId = Number(array[i])
+                break;
             }
-        })
-        resolve(poId)
+        }
+        resolve(poId)        
     })
 }
 
