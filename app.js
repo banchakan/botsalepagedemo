@@ -18,7 +18,13 @@ app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
     //testMessage(req.body.events[0].message, req.body.events[0].replyToken)
     replyMessage(req.body)
+    //checkMessage(req.body.data).then(data => {
+    //     res.json(data)  
+    // }).catch(text => {
+    //     res.json(text) 
+    // })
     res.json(200)  
+     
 })
 app.post('/social', (req, res) => {
     let message = req.body.data
@@ -35,7 +41,7 @@ function replyMessage(body){
     let msg = body.events[0].message
     let replyToken = body.events[0].replyToken
 
-    checkMessage(msg).then(() => {
+    checkMessage(msg).then(id => {
         notifyMessageLine(msg.text).then(() => {
             //ส่งข้อความให้ Admin สำเร็จ 
             request.post({
@@ -50,7 +56,7 @@ function replyMessage(body){
                         },
                         {
                             type: 'text',
-                            text: 'ขอบคุณที่ใช้บริการ'
+                            text: 'ขอบคุณที่ใช้บริการ ' + id
                         }
                     ]
                 })
@@ -90,17 +96,19 @@ function checkMessage(msg){
         if(msg.type === 'text'){
             if(msg.text.includes('New Order No.')){
                 getPomasterId(msg.text).then(poId => {
-                    api.get(`/pomaster/pomaster?id=${poId}`).then(opj_pomaster => {
+                    api.get(`/pomaster/pomaster?id=6`).then(opj_pomaster => {
                         if(opj_pomaster.data.poStatus.id === 1){
                             //พบรายการสั่งซื้อใหม่
-                            resolve(true)
+                            resolve(poId)
                         }else{
                             //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
                             reject('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
                         }
                     }).catch(err => {
+                        console.log("ERROR => ", err)
                         //ไม่พบรายการสั่งซื้อ
-                        reject('ไม่พบรายการสั่งซื้อ')
+                        //reject('ไม่พบรายการสั่งซื้อ')
+                        reject(poId)
                     })
                 })
             }else{
@@ -120,8 +128,7 @@ function getPomasterId(msg){
         let poId = null
         let array = msg.split('เวลารับสินค้า')[0].split(' ')
         array.forEach(val => {
-            let isnum = /^\d+$/.test(val);
-            console.log(`${val} => ${isnum}`)
+            let isnum = /^\d+$/.test(val)
             if(isnum){
                 poId = Number(val)
             }
