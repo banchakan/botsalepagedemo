@@ -95,21 +95,20 @@ function checkMessage(msg){
     return new Promise((resolve,reject) => {
         if(msg.type === 'text'){
             if(msg.text.includes('New Order No.')){
-                getPomasterId(msg.text).then(poId => {
-                    api.get(`/pomaster/pomaster?id=6`).then(opj_pomaster => {
-                        if(opj_pomaster.data.poStatus.id === 1){
-                            //พบรายการสั่งซื้อใหม่
-                            resolve(poId)
-                        }else{
-                            //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
-                            reject('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
-                        }
-                    }).catch(err => {
-                        console.log("ERROR => ", err)
-                        //ไม่พบรายการสั่งซื้อ
-                        //reject('ไม่พบรายการสั่งซื้อ')
-                        reject(poId)
-                    })
+                const poid = getPomasterId(msg.text)
+                api.get(`/pomaster/pomaster?id=6`).then(opj_pomaster => {
+                    if(opj_pomaster.data.poStatus.id === 1){
+                        //พบรายการสั่งซื้อใหม่
+                        resolve(poid)
+                    }else{
+                        //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
+                        reject('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
+                    }
+                }).catch(err => {
+                    console.log("ERROR => ", err)
+                    //ไม่พบรายการสั่งซื้อ
+                    //reject('ไม่พบรายการสั่งซื้อ')
+                    reject(poid)
                 })
             }else{
                 //ข้อความอื่น ๆ
@@ -124,18 +123,10 @@ function checkMessage(msg){
 
 
 function getPomasterId(msg){
-    return new Promise((resolve,reject) => {
-        let poId = null
-        let array = msg.split('เวลารับสินค้า')[0].split(' ')
-        for(let i = 0 ; i < array.length ; i++){
-            let isnum = /^\d+$/.test(array[i])
-            if(isnum === true){
-                poId = Number(array[i])
-                break;
-            }
-        }
-        resolve(poId)        
-    })
+    let array = msg.split('เวลารับสินค้า')[0].split(' ')
+    console.log("array => ", array)
+    console.log("message => ", msg)
+    return array[3]
 }
 
 
