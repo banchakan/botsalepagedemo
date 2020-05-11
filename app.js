@@ -52,11 +52,11 @@ function replyMessage(body){
             });
         }).catch(err => {
             //การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด
-            testMessage('การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด',replyToken)
+            //-testMessage('การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด',replyToken)
         })
     }).catch(text => {
         //err ดูในเมธอด checkMessage => reject
-        testMessage(text,replyToken)
+        //-testMessage(text,replyToken)
     })
 }
 
