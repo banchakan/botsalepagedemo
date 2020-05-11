@@ -16,9 +16,10 @@ const LINE_HEADER = {
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
-    //getPomasterId(req.body.data)
-    replyMessageTest(req.body)
+    replyMessage(req.body)
+    test(req.body.data)
     res.json(200)
+    
 })
 app.post('/social', (req, res) => {
     let message = req.body.data
@@ -31,7 +32,7 @@ app.post('/social', (req, res) => {
 })
 app.listen(port)
 
-function replyMessageTest(body){
+function replyMessage(body){
     const msg = body.events[0].message
     const replyToken = body.events[0].replyToken
 
@@ -65,14 +66,13 @@ function replyMessageTest(body){
     })
 }
 
-
 function checkMessage(msg){
     return new Promise((resolve,reject) => {
         if(msg.type === 'text'){
             if(mes.text.includes('New Order No.')){
                 getPomasterId(mes.text).then(poId => {
                     api.get(`/pomaster/pomaster?id=${poId}`).then(opj_pomaster => {
-                        if(opj_pomaster.poStatus.id === 1){
+                        if(opj_pomaster.data.poStatus.id === 1){
                             //พบรายการสั่งซื้อใหม่
                             resolve(true)
                         }else{
