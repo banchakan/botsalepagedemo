@@ -41,7 +41,7 @@ function replyMessage(body){
     let msg = body.events[0].message
     let replyToken = body.events[0].replyToken
 
-    checkMessage(msg).then(id => {
+    checkMessage(msg).then(cusName => {
         notifyMessageLine(msg.text).then(() => {
             //ส่งข้อความให้ Admin สำเร็จ 
             request.post({
@@ -56,7 +56,7 @@ function replyMessage(body){
                         },
                         {
                             type: 'text',
-                            text: 'ขอบคุณที่ใช้บริการ ' + id
+                            text: `ขอบคุณคุณลูกค้า ${cusName} ที่ใช้บริการ`
                         }
                     ]
                 })
@@ -99,7 +99,7 @@ function checkMessage(msg){
                 api.get(`/pomaster/pomaster?id=${poid}`).then(opj_pomaster => {
                     if(opj_pomaster.data.poStatus.id === 1){
                         //พบรายการสั่งซื้อใหม่
-                        resolve(true)
+                        resolve(opj_pomaster.data.customer.customerFullName)
                     }else{
                         //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
                         reject('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
