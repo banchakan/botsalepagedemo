@@ -51,7 +51,7 @@ function replyMessage(body){
                 headers: LINE_HEADER,
                 body: JSON.stringify({
                     replyToken: replyToken,
-                    messages: jsonMessage
+                    messages: [jsonMessage]
                 })
             }, (err, res, body) => {
                 console.log('status = ' + res.statusCode);
@@ -386,3 +386,8 @@ function getFlexMessageTemplate(poMaster){
 
     return template
 }
+
+
+
+
+
