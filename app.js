@@ -41,24 +41,16 @@ function replyMessage(body){
     let msg = body.events[0].message
     let replyToken = body.events[0].replyToken
 
-    checkMessage(msg).then(cusName => {
+    checkMessage(msg).then(poMaster => {
         notifyMessageLine(msg.text).then(() => {
-            //ส่งข้อความให้ Admin สำเร็จ 
+            //ส่งข้อความให้ Admin สำเร็จ
+            const jsonMessage = getFlexMessageTemplate(poMaster)
             request.post({
                 url: LINE_MESSAGING_API,
                 headers: LINE_HEADER,
                 body: JSON.stringify({
                     replyToken: replyToken,
-                    messages: [
-                        {
-                            type: 'text',
-                            text: 'คุณได้สั่งออเดอร์แล้ว โปรดรอการจัดส่ง'
-                        },
-                        {
-                            type: 'text',
-                            text: `ขอบคุณคุณลูกค้า ${cusName} ที่ใช้บริการ`
-                        }
-                    ]
+                    messages: [JSON.stringify(jsonMessage)]
                 })
             }, (err, res, body) => {
                 console.log('status = ' + res.statusCode);
@@ -99,7 +91,7 @@ function checkMessage(msg){
                 api.get(`/pomaster/pomaster?id=${poid}`).then(opj_pomaster => {
                     if(opj_pomaster.data.poStatus.id === 1){
                         //พบรายการสั่งซื้อใหม่
-                        resolve(opj_pomaster.data.customer.customerFullName)
+                        resolve(opj_pomaster.data)
                     }else{
                         //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
                         reject('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
@@ -162,4 +154,234 @@ function notifyMessageSocial(text){
             }
         })
     })
+}
+
+function checkTyprPay(status){
+    if(status === 1){
+        return 'เงินสด'
+    }else {
+        return 'โอนเงิน'
+    }
+}
+
+function getFlexMessageTemplate(poMaster){
+    let shopLogo = 'https://lh3.googleusercontent.com/proxy/VrqNRk4IHuiKVk_YidL-SLrzYesSbQadagSi9C_Gir6F-MMoJw5_7ZmIgJxvMMQecleONpzDE0RPc-xtqCLo1X0yQOYtFvfe1puiX0hCblBuu9tNnJQ'
+    if(poMaster.salePage.shop.shopLogoLink){
+        shopLogo = poMaster.salePage.shop.shopLogoLink
+    }
+    let shopName = poMaster.salePage.shop.shopName
+    let poId = poMaster.id
+    let pickup_time = '11/5/2020 12:30'
+    let payType = checkTyprPay(poMaster.salePage.payType[0].payTypeId)
+    let comment = poMaster.poComment
+    let total = poMaster.poSumAll
+    let cusName = poMaster.customer.customerFullName
+    let shopPhone = poMaster.salePage.shopContext.phone
+    let productList = poMaster.poDetails
+    
+    let orderFooter = [
+        {
+            type: "box",
+            layout: "baseline",
+            contents: [
+                {
+                    type: "text",
+                    text: `${comment}`,
+                    flex: 8,
+                    margin: "md",
+                    size: "xs",
+                    wrap: true
+                }
+            ]
+        },
+        {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "text",
+                    text: `รวมสุทธิ ${total} บาท`,
+                    size: "lg",
+                    align: "start",
+                    weight: "bold"
+                }
+            ]
+        },
+        {
+            type: "box",
+            layout: "vertical",
+            margin: "xxl",
+            contents: [
+                {
+                    type: "text",
+                    text: `ร้าน${shopName} ขอขอบคุณลูกค้า คุณ${cusName} ที่ใช้บริการ`,
+                    margin: "xxl",
+                    size: "xs",
+                    color: "#AAAAAA",
+                    wrap: true
+                }
+            ]
+        }
+    ]
+
+    let template = {
+        type: "flex",
+        altText: "Flex Message",
+        contents: {
+            type: "bubble",
+            hero: {
+                type: "image",
+                url: `${shopLogo}`,
+                size: "full",
+                aspectRatio: "20:13",
+                aspectMode: "cover"
+            },
+        },
+        body: {
+            type: "box",
+            layout: "vertical",
+            spacing: "md",
+            contents: [
+                {
+                    type: "text",
+                    text: `${shopName}`,
+                    size: "xl",
+                    gravity: "center",
+                    weight: "bold",
+                    wrap: true
+                },
+                {
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
+                    margin: "lg",
+                    contents: [   
+                        {
+                            type: "box",
+                            layout: "baseline",
+                            spacing: "sm",
+                            contents: [
+                                {
+                                    type: "text",
+                                    text: "ออร์เดอร์",
+                                    flex: 2,
+                                    size: "sm",
+                                    color: "#AAAAAA"
+                                },
+                                {
+                                    type: "text",
+                                    text: `${poId}`,
+                                    flex: 4,
+                                    size: "sm",
+                                    color: "#666666",
+                                    wrap: true
+                                }
+                            ]
+                        },
+                        {
+                            type: "box",
+                            layout: "baseline",
+                            spacing: "sm",
+                            contents: [
+                                {
+                                    type: "text",
+                                    text: "เวลารับสินค้า",
+                                    flex: 2,
+                                    size: "sm",
+                                    color: "#AAAAAA"
+                                },
+                                {
+                                    type: "text",
+                                    text: `${pickup_time}`,
+                                    flex: 4,
+                                    size: "sm",
+                                    color: "#666666",
+                                    wrap: true
+                                }
+                            ]
+                        },
+                        {
+                            type: "box",
+                            layout: "baseline",
+                            spacing: "sm",
+                            contents: [
+                                {
+                                    type: "text",
+                                    text: "ชำระเงิน",
+                                    flex: 2,
+                                    size: "sm",
+                                    color: "#AAAAAA"
+                                },
+                                {
+                                    type: "text",
+                                    text: `${payType}`,
+                                    flex: 4,
+                                    size: "sm",
+                                    color: "#666666",
+                                    wrap: true
+                                }
+                            ]
+                        },
+                        {
+                            type: "box",
+                            layout: "vertical",
+                            contents: [
+                                {
+                                    type: "text",
+                                    text: "รายการสินค้า",
+                                    size: "sm"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        footer: {
+            type: "box",
+            layout: "horizontal",
+            flex: 1,
+            contents: [
+                {
+                    type: "button",
+                    action: {
+                        type: "uri",
+                        label: "โทร",
+                        uri: `tel:${shopPhone}`
+                    },
+                    color: "#09A50E",
+                    style: "primary"
+                }
+            ]
+        }
+    }
+
+    productList.forEach(p => {
+        template.body.contents[1].contents.push({
+            type: "box",
+            layout: "baseline",
+            contents: [
+                {
+                    type: "text",
+                    text: "-",
+                    flex: 1,
+                    size: "xs",
+                    align: "end"
+                },
+                {
+                    type: "text",
+                    text: `${p.product.productName} ${p.poDetailCount} ${p.product.productSuffix}`,
+                    flex: 8,
+                    margin: "md",
+                    size: "xs"
+                }
+            ]
+        })
+    })
+
+    orderFooter.forEach(f => {
+        template.body.contents[1].contents.push(f)
+    })
+
+    return template
 }
