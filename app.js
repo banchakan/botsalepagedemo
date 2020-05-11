@@ -123,7 +123,7 @@ function checkMessage(msg){
 
 
 function getPomasterId(msg){
-    let array = msg.split('เวลารับสินค้า')[0].split(' ')
+    let array = msg.split('เวลารับสินค้า')[0].split('\n')[0].split(' ')
     console.log("array => ", array)
     console.log("message => ", msg)
     return array[3]
