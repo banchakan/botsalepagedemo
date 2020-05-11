@@ -45,8 +45,8 @@ function replyMessage(body){
     checkMessage(msg).then(poMaster => {
         notifyMessageLine(msg.text).then(() => {
             //ส่งข้อความให้ Admin สำเร็จ
-            //const jsonMessage = getFlexMessageTemplate(poMaster)
-            let jsonMessage = mork_tmp()
+            let jsonMessage = getFlexMessageTemplate(poMaster)
+            //let jsonMessage = mork_tmp()
             request.post({
                 url: LINE_MESSAGING_API,
                 headers: LINE_HEADER,
@@ -238,128 +238,128 @@ function getFlexMessageTemplate(poMaster){
                 aspectRatio: "20:13",
                 aspectMode: "cover"
             },
-        },
-        body: {
-            type: "box",
-            layout: "vertical",
-            spacing: "md",
-            contents: [
-                {
-                    type: "text",
-                    text: `${shopName}`,
-                    size: "xl",
-                    gravity: "center",
-                    weight: "bold",
-                    wrap: true
-                },
-                {
-                    type: "box",
-                    layout: "vertical",
-                    spacing: "sm",
-                    margin: "lg",
-                    contents: [   
-                        {
-                            type: "box",
-                            layout: "baseline",
-                            spacing: "sm",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: "ออร์เดอร์",
-                                    flex: 2,
-                                    size: "sm",
-                                    color: "#AAAAAA"
-                                },
-                                {
-                                    type: "text",
-                                    text: `${poId}`,
-                                    flex: 4,
-                                    size: "sm",
-                                    color: "#666666",
-                                    wrap: true
-                                }
-                            ]
-                        },
-                        {
-                            type: "box",
-                            layout: "baseline",
-                            spacing: "sm",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: "เวลารับสินค้า",
-                                    flex: 2,
-                                    size: "sm",
-                                    color: "#AAAAAA"
-                                },
-                                {
-                                    type: "text",
-                                    text: `${pickup_time}`,
-                                    flex: 4,
-                                    size: "sm",
-                                    color: "#666666",
-                                    wrap: true
-                                }
-                            ]
-                        },
-                        {
-                            type: "box",
-                            layout: "baseline",
-                            spacing: "sm",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: "ชำระเงิน",
-                                    flex: 2,
-                                    size: "sm",
-                                    color: "#AAAAAA"
-                                },
-                                {
-                                    type: "text",
-                                    text: `${payType}`,
-                                    flex: 4,
-                                    size: "sm",
-                                    color: "#666666",
-                                    wrap: true
-                                }
-                            ]
-                        },
-                        {
-                            type: "box",
-                            layout: "vertical",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: "รายการสินค้า",
-                                    size: "sm"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        footer: {
-            type: "box",
-            layout: "horizontal",
-            flex: 1,
-            contents: [
-                {
-                    type: "button",
-                    action: {
-                        type: "uri",
-                        label: "โทร",
-                        uri: `tel:${shopPhone}`
+            body: {
+                type: "box",
+                layout: "vertical",
+                spacing: "md",
+                contents: [
+                    {
+                        type: "text",
+                        text: `${shopName}`,
+                        size: "xl",
+                        gravity: "center",
+                        weight: "bold",
+                        wrap: true
                     },
-                    color: "#09A50E",
-                    style: "primary"
-                }
-            ]
+                    {
+                        type: "box",
+                        layout: "vertical",
+                        spacing: "sm",
+                        margin: "lg",
+                        contents: [   
+                            {
+                                type: "box",
+                                layout: "baseline",
+                                spacing: "sm",
+                                contents: [
+                                    {
+                                        type: "text",
+                                        text: "ออร์เดอร์",
+                                        flex: 2,
+                                        size: "sm",
+                                        color: "#AAAAAA"
+                                    },
+                                    {
+                                        type: "text",
+                                        text: `${poId}`,
+                                        flex: 4,
+                                        size: "sm",
+                                        color: "#666666",
+                                        wrap: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: "box",
+                                layout: "baseline",
+                                spacing: "sm",
+                                contents: [
+                                    {
+                                        type: "text",
+                                        text: "เวลารับสินค้า",
+                                        flex: 2,
+                                        size: "sm",
+                                        color: "#AAAAAA"
+                                    },
+                                    {
+                                        type: "text",
+                                        text: `${pickup_time}`,
+                                        flex: 4,
+                                        size: "sm",
+                                        color: "#666666",
+                                        wrap: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: "box",
+                                layout: "baseline",
+                                spacing: "sm",
+                                contents: [
+                                    {
+                                        type: "text",
+                                        text: "ชำระเงิน",
+                                        flex: 2,
+                                        size: "sm",
+                                        color: "#AAAAAA"
+                                    },
+                                    {
+                                        type: "text",
+                                        text: `${payType}`,
+                                        flex: 4,
+                                        size: "sm",
+                                        color: "#666666",
+                                        wrap: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: "box",
+                                layout: "vertical",
+                                contents: [
+                                    {
+                                        type: "text",
+                                        text: "รายการสินค้า",
+                                        size: "sm"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            footer: {
+                type: "box",
+                layout: "horizontal",
+                flex: 1,
+                contents: [
+                    {
+                        type: "button",
+                        action: {
+                            type: "uri",
+                            label: "โทร",
+                            uri: `tel:${shopPhone}`
+                        },
+                        color: "#09A50E",
+                        style: "primary"
+                    }
+                ]
+            }
         }
     }
 
     productList.forEach(p => {
-        template.body.contents[1].contents.push({
+        template.contents.body.contents[1].contents.push({
             type: "box",
             layout: "baseline",
             contents: [
@@ -382,7 +382,7 @@ function getFlexMessageTemplate(poMaster){
     })
 
     orderFooter.forEach(f => {
-        template.body.contents[1].contents.push(f)
+        template.contents.body.contents[1].contents.push(f)
     })
 
     return template
