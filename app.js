@@ -99,7 +99,6 @@ function checkMessage(msg){
                         reject('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
                     }
                 }).catch(err => {
-                    console.log("ERROR => ", err)
                     //ไม่พบรายการสั่งซื้อ
                     reject('ไม่พบรายการสั่งซื้อ')
                 })
