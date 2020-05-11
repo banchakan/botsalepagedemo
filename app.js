@@ -173,7 +173,7 @@ function getFlexMessageTemplate(poMaster){
     let shopName = poMaster.salePage.shop.shopName
     let poId = poMaster.id
     let pickup_time = '11/5/2020 12:30'
-    let payType = checkTyprPay(poMaster.salePage.payType[0].payTypeId)
+    let payType = checkTyprPay(poMaster.salePage.mapPayType[0].payType.payTypeId)
     let comment = poMaster.poComment
     let total = poMaster.poSumAll
     let cusName = poMaster.customer.customerFullName
