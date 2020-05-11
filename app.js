@@ -35,31 +35,35 @@ function replyMessage(body){
     let replyToken = body.events[0].replyToken
 
     checkMessage(msg).then(status => {
-        notifyMessageLine(msg.text).then(() => {
-            //ส่งข้อความให้ Admin สำเร็จ 
-            request.post({
-                url: LINE_MESSAGING_API,
-                headers: LINE_HEADER,
-                body: JSON.stringify({
-                    replyToken: replyToken,
-                    messages: [
-                        {
-                            type: 'text',
-                            text: 'คุณได้สั่งออเดอร์แล้ว โปรดรอการจัดส่ง'
-                        },
-                        {
-                            type: 'text',
-                            text: 'ขอบคุณที่ใช้บริการ'
-                        }
-                    ]
-                })
-            }, (err, res, body) => {
-                console.log('status = ' + res.statusCode);
-            });
-        }).catch(err => {
-            //การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด
-            testMessage('การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด',replyToken)
-        })
+        if(status === true){
+            notifyMessageLine(msg.text).then(() => {
+                //ส่งข้อความให้ Admin สำเร็จ 
+                request.post({
+                    url: LINE_MESSAGING_API,
+                    headers: LINE_HEADER,
+                    body: JSON.stringify({
+                        replyToken: replyToken,
+                        messages: [
+                            {
+                                type: 'text',
+                                text: 'คุณได้สั่งออเดอร์แล้ว โปรดรอการจัดส่ง'
+                            },
+                            {
+                                type: 'text',
+                                text: 'ขอบคุณที่ใช้บริการ'
+                            }
+                        ]
+                    })
+                }, (err, res, body) => {
+                    console.log('status = ' + res.statusCode);
+                });
+            }).catch(err => {
+                //การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด
+                testMessage('การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด',replyToken)
+            })
+        }else{
+            testMessage(status,replyToken)
+        }
     }).catch(text => {
         //err ดูในเมธอด checkMessage => reject
         testMessage(text,replyToken)
@@ -95,20 +99,20 @@ function checkMessage(msg){
                             resolve(true)
                         }else{
                             //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
-                            reject('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
+                            resolve('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
                         }
                     }).catch(err => {
                         //ไม่พบรายการสั่งซื้อ
-                        reject('ไม่พบรายการสั่งซื้อ')
+                        resolve('ไม่พบรายการสั่งซื้อ')
                     })
                 })
             }else{
                 //ข้อความอื่น ๆ
-                reject('ข้อความอื่น ๆ')
+                resolve('ข้อความอื่น ๆ')
             }
         }else{
             //ลูกค้าไม่ได้ส่งเป็น text
-            reject('ลูกค้าไม่ได้ส่งเป็น text')
+            resolve('ลูกค้าไม่ได้ส่งเป็น text')
         }
     })
 }
