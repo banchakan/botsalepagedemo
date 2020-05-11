@@ -16,7 +16,8 @@ const LINE_HEADER = {
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
-    replyMessage(req.body)
+    testMessage(req.body.events[0].message, req.body.events[0].replyToken)
+    //replyMessage(req.body)
     res.json(200)  
 })
 app.post('/social', (req, res) => {
