@@ -96,10 +96,10 @@ function checkMessage(msg){
         if(msg.type === 'text'){
             if(msg.text.includes('New Order No.')){
                 const poid = getPomasterId(msg.text)
-                api.get(`/pomaster/pomaster?id=6`).then(opj_pomaster => {
+                api.get(`/pomaster/pomaster?id=${poid}`).then(opj_pomaster => {
                     if(opj_pomaster.data.poStatus.id === 1){
                         //พบรายการสั่งซื้อใหม่
-                        resolve(poid)
+                        resolve(true)
                     }else{
                         //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
                         reject('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
@@ -107,8 +107,7 @@ function checkMessage(msg){
                 }).catch(err => {
                     console.log("ERROR => ", err)
                     //ไม่พบรายการสั่งซื้อ
-                    //reject('ไม่พบรายการสั่งซื้อ')
-                    reject(poid)
+                    reject('ไม่พบรายการสั่งซื้อ')
                 })
             }else{
                 //ข้อความอื่น ๆ
@@ -124,9 +123,7 @@ function checkMessage(msg){
 
 function getPomasterId(msg){
     let array = msg.split('เวลารับสินค้า')[0].split('\n')[0].split(' ')
-    console.log("array => ", array)
-    console.log("message => ", msg)
-    return array[3]
+    return array[array.length-1]
 }
 
 
