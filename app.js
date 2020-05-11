@@ -17,13 +17,7 @@ const LINE_HEADER = {
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
-    //testMessage(req.body.events[0].message, req.body.events[0].replyToken)
     replyMessage(req.body)
-    //checkMessage(req.body.data).then(data => {
-    //     res.json(data)  
-    // }).catch(text => {
-    //     res.json(text) 
-    // })
     res.json(200)  
      
 })
@@ -46,7 +40,6 @@ function replyMessage(body){
         notifyMessageLine(msg.text).then(() => {
             //ส่งข้อความให้ Admin สำเร็จ
             let jsonMessage = getFlexMessageTemplate(poMaster)
-            //let jsonMessage = mork_tmp()
             request.post({
                 url: LINE_MESSAGING_API,
                 headers: LINE_HEADER,
@@ -167,18 +160,25 @@ function checkTyprPay(status){
 
 function getFlexMessageTemplate(poMaster){
     let shopLogo = 'https://lh3.googleusercontent.com/proxy/VrqNRk4IHuiKVk_YidL-SLrzYesSbQadagSi9C_Gir6F-MMoJw5_7ZmIgJxvMMQecleONpzDE0RPc-xtqCLo1X0yQOYtFvfe1puiX0hCblBuu9tNnJQ'
-    if(poMaster.salePage.shop.shopLogoLink){
-        shopLogo = poMaster.salePage.shop.shopLogoLink
-    }
+    
     let shopName = poMaster.salePage.shop.shopName
     let poId = poMaster.id
-    let pickup_time = '11/5/2020 12:30'
+    
     let payType = checkTyprPay(poMaster.salePage.mapPayType[0].payType.payTypeId)
     let comment = poMaster.poComment
     let total = poMaster.poSumAll
     let cusName = poMaster.customer.customerFullName
     let shopPhone = poMaster.salePage.shopContext.phone
     let productList = poMaster.poDetails
+
+    let date = new Date(poMaster.pickUpTime+'')
+    let h = date.getHours().toString()
+    let m = date.getMinutes().toString()
+    let pickup_time = `${h.padStart(2, '0')}:${m.padStart(2, '0')}`
+
+    if(poMaster.salePage.shop.shopLogoLink){
+        shopLogo = poMaster.salePage.shop.shopLogoLink
+    }
     
     let orderFooter = [
         {
@@ -386,224 +386,3 @@ function getFlexMessageTemplate(poMaster){
 
     return template
 }
-
-function mork_tmp(){
-    return{
-        "type": "flex",
-        "altText": "Flex Message",
-        "contents": {
-          "type": "bubble",
-          "hero": {
-            "type": "image",
-            "url": "https://lh3.googleusercontent.com/proxy/VrqNRk4IHuiKVk_YidL-SLrzYesSbQadagSi9C_Gir6F-MMoJw5_7ZmIgJxvMMQecleONpzDE0RPc-xtqCLo1X0yQOYtFvfe1puiX0hCblBuu9tNnJQ",
-            "size": "full",
-            "aspectRatio": "20:13",
-            "aspectMode": "cover"
-          },
-          "body": {
-            "type": "box",
-            "layout": "vertical",
-            "spacing": "md",
-            "contents": [
-              {
-                "type": "text",
-                "text": "ส้มตำปางสะหวัน",
-                "size": "xl",
-                "gravity": "center",
-                "weight": "bold",
-                "wrap": true
-              },
-              {
-                "type": "box",
-                "layout": "vertical",
-                "spacing": "sm",
-                "margin": "lg",
-                "contents": [
-                  {
-                    "type": "box",
-                    "layout": "baseline",
-                    "spacing": "sm",
-                    "contents": [
-                      {
-                        "type": "text",
-                        "text": "ออร์เดอร์",
-                        "flex": 2,
-                        "size": "sm",
-                        "color": "#AAAAAA"
-                      },
-                      {
-                        "type": "text",
-                        "text": "100",
-                        "flex": 4,
-                        "size": "sm",
-                        "color": "#666666",
-                        "wrap": true
-                      }
-                    ]
-                  },
-                  {
-                    "type": "box",
-                    "layout": "baseline",
-                    "spacing": "sm",
-                    "contents": [
-                      {
-                        "type": "text",
-                        "text": "เวลารับสินค้า",
-                        "flex": 2,
-                        "size": "sm",
-                        "color": "#AAAAAA"
-                      },
-                      {
-                        "type": "text",
-                        "text": "11/05/2020 12:30",
-                        "flex": 4,
-                        "size": "sm",
-                        "color": "#666666",
-                        "wrap": true
-                      }
-                    ]
-                  },
-                  {
-                    "type": "box",
-                    "layout": "baseline",
-                    "spacing": "sm",
-                    "contents": [
-                      {
-                        "type": "text",
-                        "text": "ชำระเงิน",
-                        "flex": 2,
-                        "size": "sm",
-                        "color": "#AAAAAA"
-                      },
-                      {
-                        "type": "text",
-                        "text": "เงินสด",
-                        "flex": 4,
-                        "size": "sm",
-                        "color": "#666666",
-                        "wrap": true
-                      }
-                    ]
-                  },
-                  {
-                    "type": "box",
-                    "layout": "vertical",
-                    "contents": [
-                      {
-                        "type": "text",
-                        "text": "รายการสินค้า",
-                        "size": "sm"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "box",
-                    "layout": "baseline",
-                    "contents": [
-                      {
-                        "type": "text",
-                        "text": "-",
-                        "flex": 1,
-                        "size": "xs",
-                        "align": "end"
-                      },
-                      {
-                        "type": "text",
-                        "text": "ตำไทยใส่ปู 1 จาน",
-                        "flex": 8,
-                        "margin": "md",
-                        "size": "xs"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "box",
-                    "layout": "baseline",
-                    "contents": [
-                      {
-                        "type": "text",
-                        "text": "-",
-                        "flex": 1,
-                        "size": "xs",
-                        "align": "end"
-                      },
-                      {
-                        "type": "text",
-                        "text": "ตำลาว 2 จาน",
-                        "flex": 8,
-                        "margin": "md",
-                        "size": "xs"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "box",
-                    "layout": "baseline",
-                    "contents": [
-                      {
-                        "type": "text",
-                        "text": "เพิ่มผักเครื่องเคียง และพริก 2 เท่า เพิ่มผักเครื่องเคียง และพริก 2 เท่า เพิ่มผักเครื่องเคียง",
-                        "flex": 8,
-                        "margin": "md",
-                        "size": "xs",
-                        "wrap": true
-                      }
-                    ]
-                  },
-                  {
-                    "type": "box",
-                    "layout": "vertical",
-                    "contents": [
-                      {
-                        "type": "text",
-                        "text": "รวมสุทธิ 250 บาท",
-                        "size": "lg",
-                        "align": "start",
-                        "weight": "bold"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "box",
-                    "layout": "vertical",
-                    "margin": "xxl",
-                    "contents": [
-                      {
-                        "type": "text",
-                        "text": "ร้าน xxxx ขอขอบคุณคุณลูกค้า xxx ที่ใช้บริการ",
-                        "margin": "xxl",
-                        "size": "xs",
-                        "color": "#AAAAAA",
-                        "wrap": true
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "footer": {
-            "type": "box",
-            "layout": "horizontal",
-            "flex": 1,
-            "contents": [
-              {
-                "type": "button",
-                "action": {
-                  "type": "uri",
-                  "label": "โทร",
-                  "uri": "tel:0884204269"
-                },
-                "color": "#09A50E",
-                "style": "primary"
-              }
-            ]
-          }
-        }
-      }
-}
-
-
-
-
-
