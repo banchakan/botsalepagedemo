@@ -31,8 +31,8 @@ app.post('/social', (req, res) => {
 app.listen(port)
 
 function replyMessage(body){
-    const msg = body.events[0].message
-    const replyToken = body.events[0].replyToken
+    let msg = body.events[0].message
+    let replyToken = body.events[0].replyToken
 
     checkMessage(msg).then(status => {
         notifyMessageLine(msg.text).then(() => {
@@ -40,7 +40,7 @@ function replyMessage(body){
             request.post({
                 url: LINE_MESSAGING_API,
                 headers: LINE_HEADER,
-                body: body = JSON.stringify({
+                body: JSON.stringify({
                     replyToken: replyToken,
                     messages: [
                         {
@@ -70,7 +70,7 @@ function testMessage(text,replyToken){
     request.post({
         url: LINE_MESSAGING_API,
         headers: LINE_HEADER,
-        body: body = JSON.stringify({
+        body: JSON.stringify({
             replyToken: replyToken,
             messages: [
                 {
@@ -383,15 +383,15 @@ function notifyMessageSocial(text){
 
 
 
-function findOrderIdByMessageNewOrder(msg){
-    return new Promise((resolve,reject) => {
-        let orderId = null
-        let text = msg.split('ชื่อ')[0].split(' ')
-        text.forEach(sub_text => {
-            if(Number(sub_text)){
-                orderId = sub_text
-            }
-        })
-        resolve(orderId)
-    })
-}
+// function findOrderIdByMessageNewOrder(msg){
+//     return new Promise((resolve,reject) => {
+//         let orderId = null
+//         let text = msg.split('ชื่อ')[0].split(' ')
+//         text.forEach(sub_text => {
+//             if(Number(sub_text)){
+//                 orderId = sub_text
+//             }
+//         })
+//         resolve(orderId)
+//     })
+// }
