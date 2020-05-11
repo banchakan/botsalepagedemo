@@ -5,6 +5,7 @@ const request = require('request')
 const app = express()
 const port = process.env.PORT || 4000
 const api = require('./config/createInstance');
+const fs = require('fs')
 
 const TOKEN_GROUP_ADMIN = '3iEMFExWiRAUpKfW8ZAA59KR44BEDdVpG18SYCVSZMj'
 const LINE_MESSAGING_API = 'https://api.line.me/v2/bot/message/reply';
@@ -50,7 +51,7 @@ function replyMessage(body){
                 headers: LINE_HEADER,
                 body: JSON.stringify({
                     replyToken: replyToken,
-                    messages: [JSON.stringify(jsonMessage)]
+                    messages: jsonMessage
                 })
             }, (err, res, body) => {
                 console.log('status = ' + res.statusCode);
