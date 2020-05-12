@@ -161,7 +161,7 @@ function checkTyprPay(status){
 }
 
 function getFlexMessageTemplate(poMaster){
-//-return new Promise((resolve,reject) => {
+// return new Promise((resolve,reject) => {
     let shopLogo = 'https://lh3.googleusercontent.com/proxy/VrqNRk4IHuiKVk_YidL-SLrzYesSbQadagSi9C_Gir6F-MMoJw5_7ZmIgJxvMMQecleONpzDE0RPc-xtqCLo1X0yQOYtFvfe1puiX0hCblBuu9tNnJQ'
     let shopName = poMaster.salePage.shop.shopName
     let poId = poMaster.id
@@ -182,23 +182,21 @@ function getFlexMessageTemplate(poMaster){
     }
 
     let footer = {
-        footer: {
-            type: "box",
-            layout: "horizontal",
-            flex: 1,
-            contents: [
-                {
-                    type: "button",
-                    action: {
-                        type: "uri",
-                        label: "โทร",
-                        uri: `tel:${shopPhone}`
-                    },
-                    color: "#09A50E",
-                    style: "primary"
-                }
-            ]
-        }
+        type: "box",
+        layout: "horizontal",
+        flex: 1,
+        contents: [
+            {
+                type: "button",
+                action: {
+                    type: "uri",
+                    label: "โทร",
+                    uri: `tel:${shopPhone}`
+                },
+                color: "#09A50E",
+                style: "primary"
+            }
+        ]
     }
     
     let orderFooter = [
@@ -403,6 +401,6 @@ function getFlexMessageTemplate(poMaster){
     }
 
     return template
-    //resolve(template)    
-//})
+//     resolve(template)    
+// })
 }
