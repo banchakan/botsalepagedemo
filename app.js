@@ -7,7 +7,6 @@ const port = process.env.PORT || 4000
 const api = require('./config/createInstance')
 const url = require('url')
 
-
 const LINE_MESSAGING_API = 'https://api.line.me/v2/bot/message/reply'
 let line_header = null
 let token_group_admin = null
@@ -24,6 +23,8 @@ app.post('/:shop', (req, res) => {
             'Authorization': `Bearer {${domain.data.channelAccessToken}}`
         }
         token_group_admin = domain.data.lineTokenFull
+        console.log('line_header => ', line_header)
+        console.log('token_group_admin => ', token_group_admin)
         replyMessage(req.body)
         res.json(200)
     })
