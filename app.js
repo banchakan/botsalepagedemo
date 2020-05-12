@@ -14,9 +14,10 @@ let token_group_admin = null
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-app.post('/:shop', (req, res) => {
+app.post('/:shop', (reqs, res) => {
     let path = url.parse(req.url).path
-    let subdomain = path.slice(1, path.length)  
+    let subdomain = path.slice(1, path.length)
+    console.log('subdomain => ', subdomain)
     api.get(`/shop/channelaccesstoken?subDomain=${subdomain}`).then(domain => {
         line_header = {
             'Content-Type': 'application/json',
@@ -25,7 +26,7 @@ app.post('/:shop', (req, res) => {
         token_group_admin = domain.data.lineTokenFull
         console.log('line_header => ', line_header)
         console.log('token_group_admin => ', token_group_admin)
-        replyMessage(req.body)
+        replyMessage(reqs.body)
         res.json(200)
     })
 })
