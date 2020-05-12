@@ -17,9 +17,11 @@ const LINE_HEADER = {
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
+    // getFlexMessageTemplate(req.body.data).then(data => {
+    //     res.json(data) 
+    // })
     replyMessage(req.body)
-    res.json(200)  
-     
+    res.json(200)   
 })
 app.post('/social', (req, res) => {
     let message = req.body.data
@@ -159,11 +161,10 @@ function checkTyprPay(status){
 }
 
 function getFlexMessageTemplate(poMaster){
+//-return new Promise((resolve,reject) => {
     let shopLogo = 'https://lh3.googleusercontent.com/proxy/VrqNRk4IHuiKVk_YidL-SLrzYesSbQadagSi9C_Gir6F-MMoJw5_7ZmIgJxvMMQecleONpzDE0RPc-xtqCLo1X0yQOYtFvfe1puiX0hCblBuu9tNnJQ'
-    
     let shopName = poMaster.salePage.shop.shopName
     let poId = poMaster.id
-    
     let payType = checkTyprPay(poMaster.salePage.mapPayType[0].payType.payTypeId)
     let comment = poMaster.poComment
     let total = poMaster.poSumAll
@@ -178,6 +179,26 @@ function getFlexMessageTemplate(poMaster){
 
     if(poMaster.salePage.shop.shopLogoLink){
         shopLogo = poMaster.salePage.shop.shopLogoLink
+    }
+
+    let footer = {
+        footer: {
+            type: "box",
+            layout: "horizontal",
+            flex: 1,
+            contents: [
+                {
+                    type: "button",
+                    action: {
+                        type: "uri",
+                        label: "โทร",
+                        uri: `tel:${shopPhone}`
+                    },
+                    color: "#09A50E",
+                    style: "primary"
+                }
+            ]
+        }
     }
     
     let orderFooter = [
@@ -224,7 +245,7 @@ function getFlexMessageTemplate(poMaster){
             ]
         }
     ]
-
+    
     let template = {
         type: "flex",
         altText: "Flex Message",
@@ -336,24 +357,8 @@ function getFlexMessageTemplate(poMaster){
                         ]
                     }
                 ]
-            },
-            footer: {
-                type: "box",
-                layout: "horizontal",
-                flex: 1,
-                contents: [
-                    {
-                        type: "button",
-                        action: {
-                            type: "uri",
-                            label: "โทร",
-                            uri: `tel:${shopPhone}`
-                        },
-                        color: "#09A50E",
-                        style: "primary"
-                    }
-                ]
             }
+            //- Footer
         }
     }
 
@@ -380,9 +385,24 @@ function getFlexMessageTemplate(poMaster){
         })
     })
 
-    orderFooter.forEach(f => {
-        template.contents.body.contents[1].contents.push(f)
+    orderFooter.forEach((content, i) => {
+        if( i === 0){
+            if(comment && comment !== ''){
+                template.contents.body.contents[1].contents.push(content)
+            }
+        }else{
+            template.contents.body.contents[1].contents.push(content)
+        }
     })
 
+    if(shopPhone && shopPhone !== ''){
+        template.contents = {
+            ...template.contents,
+            footer
+        }
+    }
+
     return template
+    //resolve(template)    
+//})
 }
