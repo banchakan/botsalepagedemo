@@ -14,20 +14,16 @@ let token_group_admin = null
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-app.post('/:shop', (reqs, res) => {
+app.post('/:shop', (req, res) => {
     let path = url.parse(req.url).path
     let subdomain = path.slice(1, path.length)
-    console.log('subdomain => ', subdomain)
-    api.get(`/shop/channelaccesstoken?subDomain=${subdomain}`).then(domain => {
-        line_header = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer {${domain.data.channelAccessToken}}`
-        }
-        token_group_admin = domain.data.lineTokenFull
-        console.log('line_header => ', line_header)
-        console.log('token_group_admin => ', token_group_admin)
-        replyMessage(reqs.body)
+    
+    //console.log('subdomain => ', subdomain)
+    getToken(subdomain).then(() => {
+        replyMessage(req.body)
         res.json(200)
+    }).catch(err => {
+        res.json(500)
     })
 })
 app.post('/social', (req, res) => {
@@ -39,6 +35,23 @@ app.post('/social', (req, res) => {
     })
 })
 app.listen(port)
+
+function getToken(subdomain){
+    return new Promise((resolve,reject) => {
+        api.get(`/shop/channelaccesstoken?subDomain=${subdomain}`).then(domain => {
+            line_header = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer {${domain.data.channelAccessToken}}`
+            }
+            token_group_admin = `${domain.data.lineTokenFull}`
+            //console.log('line_header => ', line_header)
+            //console.log('token_group_admin => ', token_group_admin)
+            resolve(true)
+        }).catch(err => {
+            reject(null)
+        })
+    })
+}
 
 function replyMessage(body){
     let msg = body.events[0].message
