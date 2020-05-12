@@ -4,24 +4,29 @@ const bodyParser = require('body-parser')
 const request = require('request')
 const app = express()
 const port = process.env.PORT || 4000
-const api = require('./config/createInstance');
-const fs = require('fs')
+const api = require('./config/createInstance')
+const url = require('url')
 
-const TOKEN_GROUP_ADMIN = '3iEMFExWiRAUpKfW8ZAA59KR44BEDdVpG18SYCVSZMj'
-const LINE_MESSAGING_API = 'https://api.line.me/v2/bot/message/reply';
-const LINE_HEADER = {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer {XdnwLY7GgF/eWd1Uy8nPCThmPtS9DfxU9wJU/MErEz3NwmCJ8TGX6Op35C4CczUTEHY1rlrTEzaiETLiqevZgdgiYk9Ds04TeYPEWXs2TqEqfKiGb3GqsOC+ovynf4mXVFFVbCLftNUC35+SgEuMdQdB04t89/1O/w1cDnyilFU=}'
-}
+
+const LINE_MESSAGING_API = 'https://api.line.me/v2/bot/message/reply'
+let line_header = null
+let token_group_admin = null
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-app.post('/webhook', (req, res) => {
-    // getFlexMessageTemplate(req.body.data).then(data => {
-    //     res.json(data) 
-    // })
-    replyMessage(req.body)
-    res.json(200)   
+
+app.post('/:shop', (req, res) => {
+    let path = url.parse(req.url).path
+    let subdomain = path.slice(1, path.length)  
+    api.get(`/shop/channelaccesstoken?subDomain=${subdomain}`).then(domain => {
+        line_header = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer {${domain.data.channelAccessToken}}`
+        }
+        token_group_admin = domain.data.lineTokenFull
+        replyMessage(req.body)
+        res.json(200)
+    })
 })
 app.post('/social', (req, res) => {
     let message = req.body.data
@@ -30,7 +35,6 @@ app.post('/social', (req, res) => {
     }).catch(err => {
         res.json(false)
     })
-    
 })
 app.listen(port)
 
@@ -44,7 +48,7 @@ function replyMessage(body){
             let jsonMessage = getFlexMessageTemplate(poMaster)
             request.post({
                 url: LINE_MESSAGING_API,
-                headers: LINE_HEADER,
+                headers: line_header,
                 body: JSON.stringify({
                     replyToken: replyToken,
                     messages: [jsonMessage]
@@ -65,7 +69,7 @@ function replyMessage(body){
 function testMessage(text,replyToken){
     request.post({
         url: LINE_MESSAGING_API,
-        headers: LINE_HEADER,
+        headers: line_header,
         body: JSON.stringify({
             replyToken: replyToken,
             messages: [
@@ -122,7 +126,7 @@ function notifyMessageLine(text){
             method: 'POST',
             uri: 'https://notify-api.line.me/api/notify',
             header: {'Content-Type': 'application/x-www-form-urlencoded'},
-            auth: {bearer: TOKEN_GROUP_ADMIN},
+            auth: {bearer: token_group_admin},
             form: {message: `${text}\nช่องทางการสั่งซื้อ: LINE`}
         }, (err, httpResponse, body) => {
             if (err) {
@@ -140,7 +144,7 @@ function notifyMessageSocial(text){
             method: 'POST',
             uri: 'https://notify-api.line.me/api/notify',
             header: {'Content-Type': 'application/x-www-form-urlencoded'},
-            auth: {bearer: TOKEN_GROUP_ADMIN},
+            auth: {bearer: token_group_admin},
             form: {message: `${text}\nช่องทางการสั่งซื้อ: Facebook/อื่น ๆ`}
         }, (err, httpResponse, body) => {
             if (err) {
