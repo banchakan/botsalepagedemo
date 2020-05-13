@@ -1,4 +1,3 @@
-
 const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
@@ -17,36 +16,51 @@ app.use(bodyParser.json())
 app.post('/:shop', (req, res) => {
     let path = url.parse(req.url).path
     let subdomain = path.slice(1, path.length)
-    
-    //console.log('subdomain => ', subdomain)
     getToken(subdomain).then(() => {
         replyMessage(req.body)
         res.json(200)
     }).catch(err => {
+        console.log('get token error')
         res.json(500)
     })
 })
-app.post('/social', (req, res) => {
-    let message = req.body.data
-    notifyMessageSocial(message).then(() => {
-        res.json(true)
-    }).catch(err => {
-        res.json(false)
-    })
-})
+
+// app.post('/notify', (req, res) => {
+//     api.post('/lineliff/sendnotify', {salePageId: req.body.data.salePageId, text: req.body.data.text}).then(result => {
+//         if(result.data.code && result.data.code === 200){
+//             res.json('OK')
+//         }else{
+//             res.json('Error 1 => ', result.data)
+//         }
+//     }).catch(err => {
+//         res.json('Error => ', err)
+//     })
+// })
+
+// app.post('/social', (req, res) => {
+//     let message = req.body.data
+//     notifyMessageSocial(message).then(() => {
+//         res.json(true)
+//     }).catch(err => {
+//         res.json(false)
+//     })
+// })
+
 app.listen(port)
 
 function getToken(subdomain){
     return new Promise((resolve,reject) => {
         api.get(`/shop/channelaccesstoken?subDomain=${subdomain}`).then(domain => {
-            line_header = {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer {${domain.data.channelAccessToken}}`
+            if(domain.data.channelAccessToken){
+                line_header = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer {${domain.data.channelAccessToken}}`
+                }
+                token_group_admin = `${domain.data.lineTokenFull}`
+                resolve(true)
+            }else{
+                reject(null)
             }
-            token_group_admin = `${domain.data.lineTokenFull}`
-            //console.log('line_header => ', line_header)
-            //console.log('token_group_admin => ', token_group_admin)
-            resolve(true)
         }).catch(err => {
             reject(null)
         })
@@ -56,9 +70,8 @@ function getToken(subdomain){
 function replyMessage(body){
     let msg = body.events[0].message
     let replyToken = body.events[0].replyToken
-
     checkMessage(msg).then(poMaster => {
-        notifyMessageLine(msg.text).then(() => {
+        notifyMessageLine({salePageId: poMaster.salePage.salePageId, text: msg.text}).then(() => {
             //ส่งข้อความให้ Admin สำเร็จ
             let jsonMessage = getFlexMessageTemplate(poMaster)
             request.post({
@@ -73,30 +86,28 @@ function replyMessage(body){
             });
         }).catch(err => {
             //การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด
-            //-testMessage('การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด',replyToken)
+            console.log("notify message admin error => ", err)
+            request.post({
+                url: LINE_MESSAGING_API,
+                headers: line_header,
+                body: JSON.stringify({
+                    replyToken: replyToken,
+                    messages: [
+                        {
+                            type: 'text',
+                            //-text: `ร้าน ${poMaster.salePage.shop.shopName} ไม่สามารถรับออร์เดอร์ได้ในขณะนี้ ขอขอบ คุณ${poMaster.customer.customerFullName} ที่ต้องการใช้บริการ ทางร้านจะเปิดรับออร์เดอร์ในภายหลัง`
+                            text: `${err.toString()}`
+                        }
+                    ]
+                })
+            }, (err, res, body) => {
+                console.log('status = ' + res.statusCode);
+            });
         })
     }).catch(text => {
+        console.log('error message => ', text)
         //err ดูในเมธอด checkMessage => reject
-        //-testMessage(text,replyToken)
     })
-}
-
-function testMessage(text,replyToken){
-    request.post({
-        url: LINE_MESSAGING_API,
-        headers: line_header,
-        body: JSON.stringify({
-            replyToken: replyToken,
-            messages: [
-                {
-                    type: 'text',
-                    text: text
-                }
-            ]
-        })
-    }, (err, res, body) => {
-        console.log('status = ' + res.statusCode);
-    });
 }
 
 function checkMessage(msg){
@@ -110,91 +121,98 @@ function checkMessage(msg){
                         resolve(opj_pomaster.data)
                     }else{
                         //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
-                        reject('พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่')
+                        reject('status not start')
                     }
                 }).catch(err => {
                     //ไม่พบรายการสั่งซื้อ
-                    reject('ไม่พบรายการสั่งซื้อ')
+                    reject('order not found')
                 })
             }else{
                 //ข้อความอื่น ๆ
-                reject('ข้อความอื่น ๆ')
+                reject('other text')
             }
         }else{
             //ลูกค้าไม่ได้ส่งเป็น text
-            reject('ลูกค้าไม่ได้ส่งเป็น text')
+            reject('not text')
         }
     })
 }
 
-
 function getPomasterId(msg){
     let array = msg.split('เวลารับสินค้า')[0].split('\n')[0].split(' ')
+    console.log('========> POID => ', array[array.length-1])
     return array[array.length-1]
 }
 
-
-
-function notifyMessageLine(text){
+function notifyMessageLine(message){
     return new Promise((resolve,reject) => {
-        request({
-            method: 'POST',
-            uri: 'https://notify-api.line.me/api/notify',
-            header: {'Content-Type': 'application/x-www-form-urlencoded'},
-            auth: {bearer: token_group_admin},
-            form: {message: `${text}\nช่องทางการสั่งซื้อ: LINE`}
-        }, (err, httpResponse, body) => {
-            if (err) {
+        api.post('/lineliff/sendnotify', message).then(res => {
+            console.log(res.data)
+            if(res.data.code && res.data.code === 200){
+                resolve(true)
+            }else{
                 reject(null)
-            } else {
-                resolve(JSON.parse(body))
             }
         })
     })
 }
 
-function notifyMessageSocial(text){
-    return new Promise((resolve,reject) => {
-        request({
-            method: 'POST',
-            uri: 'https://notify-api.line.me/api/notify',
-            header: {'Content-Type': 'application/x-www-form-urlencoded'},
-            auth: {bearer: token_group_admin},
-            form: {message: `${text}\nช่องทางการสั่งซื้อ: Facebook/อื่น ๆ`}
-        }, (err, httpResponse, body) => {
-            if (err) {
-                reject(null)
-            } else {
-                resolve(JSON.parse(body))
-            }
-        })
-    })
-}
+// function notifyMessageSocial(){
+//     return new Promise((resolve,reject) => {
+//         request({
+//             method: 'POST',
+//             uri: 'https://notify-api.line.me/api/notify',
+//             header: {'Content-Type': 'application/x-www-form-urlencoded'},
+//             auth: {bearer: 'r7MC3j5B84SECqInbbFv5YvieI7xQZdDedSbrCxJEJu'},
+//             form: {message: 'เมาแล้ว'}
+//         }, (err, httpResponse, body) => {
+//             if (err) {
+//                 reject(null)
+//             } else {
+//                 resolve(JSON.parse(body))
+//             }
+//         })
+//     })
+// }
 
 function checkTyprPay(status){
     if(status === 1){
-        return 'เงินสด'
-    }else {
         return 'โอนเงิน'
+    }else if(status === 2) {
+        return 'เงินสด'
+    }else{
+        return 'ไม่ระบุ'
     }
 }
 
 function getFlexMessageTemplate(poMaster){
-// return new Promise((resolve,reject) => {
     let shopLogo = 'https://lh3.googleusercontent.com/proxy/VrqNRk4IHuiKVk_YidL-SLrzYesSbQadagSi9C_Gir6F-MMoJw5_7ZmIgJxvMMQecleONpzDE0RPc-xtqCLo1X0yQOYtFvfe1puiX0hCblBuu9tNnJQ'
-    let shopName = poMaster.salePage.shop.shopName
     let poId = poMaster.id
     let payType = checkTyprPay(poMaster.salePage.mapPayType[0].payType.payTypeId)
     let comment = poMaster.poComment
     let total = poMaster.poSumAll
-    let cusName = poMaster.customer.customerFullName
-    let shopPhone = poMaster.salePage.shopContext.phone
     let productList = poMaster.poDetails
-
     let date = new Date(poMaster.pickUpTime+'')
     let h = date.getHours().toString()
     let m = date.getMinutes().toString()
     let pickup_time = `${h.padStart(2, '0')}:${m.padStart(2, '0')}`
+
+    let shopPhone = ''
+    if(poMaster.salePage.shopContact){
+        if(poMaster.salePage.shopContact.phone){
+            shopPhone = poMaster.salePage.shopContact.phone
+        }
+    }
+
+    let shopName = 'ยืนยันการสั่งซื้อ'
+    if(poMaster.salePage.shop.shopName){
+        shopName = poMaster.salePage.shop.shopName
+    }
+    
+    let cusName = 'ไม่ประสงค์ออกนาม'
+    if(poMaster.customer.customerFullName){
+        cusName = poMaster.customer.customerFullName
+    }
 
     if(poMaster.salePage.shop.shopLogoLink){
         shopLogo = poMaster.salePage.shop.shopLogoLink
@@ -225,7 +243,7 @@ function getFlexMessageTemplate(poMaster){
             contents: [
                 {
                     type: "text",
-                    text: `${comment}`,
+                    text: `หมายเหตุ ${comment}`,
                     flex: 8,
                     margin: "md",
                     size: "xs",
@@ -253,7 +271,7 @@ function getFlexMessageTemplate(poMaster){
             contents: [
                 {
                     type: "text",
-                    text: `ร้าน${shopName} ขอขอบคุณลูกค้า คุณ${cusName} ที่ใช้บริการ`,
+                    text: `${shopName} ขอขอบคุณลูกค้า ${cusName} ที่ใช้บริการ`,
                     margin: "xxl",
                     size: "xs",
                     color: "#AAAAAA",
@@ -375,7 +393,6 @@ function getFlexMessageTemplate(poMaster){
                     }
                 ]
             }
-            //- Footer
         }
     }
 
@@ -412,7 +429,7 @@ function getFlexMessageTemplate(poMaster){
         }
     })
 
-    if(shopPhone && shopPhone !== ''){
+    if(shopPhone){
         template.contents = {
             ...template.contents,
             footer
@@ -420,6 +437,4 @@ function getFlexMessageTemplate(poMaster){
     }
 
     return template
-//     resolve(template)    
-// })
 }
