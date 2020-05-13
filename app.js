@@ -70,40 +70,55 @@ function getToken(subdomain){
 function replyMessage(body){
     let msg = body.events[0].message
     let replyToken = body.events[0].replyToken
-    checkMessage(msg).then(poMaster => {
-        notifyMessageLine({salePageId: poMaster.salePage.salePageId, text: msg.text}).then(() => {
-            //ส่งข้อความให้ Admin สำเร็จ
-            let jsonMessage = getFlexMessageTemplate(poMaster)
-            request.post({
-                url: LINE_MESSAGING_API,
-                headers: line_header,
-                body: JSON.stringify({
-                    replyToken: replyToken,
-                    messages: [jsonMessage]
-                })
-            }, (err, res, body) => {
-                console.log('status = ' + res.statusCode);
-            });
-        }).catch(err => {
-            //การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด
-            console.log("notify message admin error => ", err)
-            request.post({
-                url: LINE_MESSAGING_API,
-                headers: line_header,
-                body: JSON.stringify({
-                    replyToken: replyToken,
-                    messages: [
-                        {
-                            type: 'text',
-                            //-text: `ร้าน ${poMaster.salePage.shop.shopName} ไม่สามารถรับออร์เดอร์ได้ในขณะนี้ ขอขอบ คุณ${poMaster.customer.customerFullName} ที่ต้องการใช้บริการ ทางร้านจะเปิดรับออร์เดอร์ในภายหลัง`
-                            text: `${err.toString()}`
-                        }
-                    ]
-                })
-            }, (err, res, body) => {
-                console.log('status = ' + res.statusCode);
-            });
-        })
+    checkMessage(msg).then(result => {
+        if(result.type === 'order'){
+            notifyMessageLine({salePageId: result.data.salePage.salePageId, text: msg.text}).then(() => {
+                //ส่งข้อความให้ Admin สำเร็จ
+                let jsonMessage = getFlexMessageTemplate(result.data)
+                request.post({
+                    url: LINE_MESSAGING_API,
+                    headers: line_header,
+                    body: JSON.stringify({
+                        replyToken: replyToken,
+                        messages: [jsonMessage]
+                    })
+                }, (err, res, body) => {
+                    console.log('status = ' + res.statusCode);
+                });
+            }).catch(err => {
+                //การส่งข้อความไปยังกลุ่ม Admin ผิดพลาด
+                console.log("notify message admin error => ", err)
+                request.post({
+                    url: LINE_MESSAGING_API,
+                    headers: line_header,
+                    body: JSON.stringify({
+                        replyToken: replyToken,
+                        messages: [
+                            {
+                                type: 'text',
+                                text: `ร้าน ${result.data.salePage.shop.shopName} ไม่สามารถรับออร์เดอร์ได้ในขณะนี้ ขอขอบ คุณ${result.data.customer.customerFullName} ที่ต้องการใช้บริการ ทางร้านจะเปิดรับออร์เดอร์ในภายหลัง`
+                                //-text: `${err.toString()}`
+                            }
+                        ]
+                    })
+                }, (err, res, body) => {
+                    console.log('status = ' + res.statusCode);
+                });
+            })
+        }else if(result.type === 'reserve') {
+            let message = `การจองโต๊ะ รบกวนขอทราบ\nชื่อลูกค้า\nเบอร์โทร\nจำนวนคน\nเวลาเข้ามาที่ร้าน\n**หลังส่งข้อความแล้วรอการตอบกลับยืนยันจากทางร้านได้เลยค่ะ**`
+            replyMessageText(message, replyToken).then(() => {
+                // let notifyMessage = `มีการจองโต๊ะจากลูกค้า\n**กำลังรอการตอบกลับ**`
+                // notifyMessageLine(notifyMessage)
+            })
+        }else if(result.type === 'promotion'){
+            let message = `รับอาหารที่ร้าน รับส่วนรด 10%`
+            let imageUrl = 'https://firebasestorage.googleapis.com/v0/b/salepage-54ec5.appspot.com/o/promotion.png?alt=media&token=29f4cbf1-07ae-4c0d-be4b-0b7d2ad836bd'
+            replyMessageImage(message, imageUrl , replyToken).then(() => {
+                // let notifyMessage = `มีการจองโต๊ะจากลูกค้า\n**กำลังรอการตอบกลับ**`
+                // notifyMessageLine(notifyMessage)
+            })
+        }
     }).catch(text => {
         console.log('error message => ', text)
         //err ดูในเมธอด checkMessage => reject
@@ -113,12 +128,16 @@ function replyMessage(body){
 function checkMessage(msg){
     return new Promise((resolve,reject) => {
         if(msg.type === 'text'){
-            if(msg.text.includes('New Order No.')){
+            if(msg.text === 'จองโต๊ะ'){
+                resolve({type: 'reserve', data: null})
+            }else if(msg.text === 'โปรโมชัน'){
+                resolve({type: 'promotion', data: null})
+            }else if(msg.text.includes('New Order No.')){
                 const poid = getPomasterId(msg.text)
                 api.get(`/pomaster/pomaster?id=${poid}`).then(opj_pomaster => {
                     if(opj_pomaster.data.poStatus.id === 1){
                         //พบรายการสั่งซื้อใหม่
-                        resolve(opj_pomaster.data)
+                        resolve({type: 'order', data: opj_pomaster.data})
                     }else{
                         //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
                         reject('status not start')
@@ -142,6 +161,55 @@ function getPomasterId(msg){
     let array = msg.split('เวลารับสินค้า')[0].split('\n')[0].split(' ')
     console.log('========> POID => ', array[array.length-1])
     return array[array.length-1]
+}
+
+function replyMessageText(message, replyToken){
+    return new Promise((resolve,reject) => {
+        request.post({
+            url: LINE_MESSAGING_API,
+            headers: line_header,
+            body: JSON.stringify({
+                replyToken: replyToken,
+                messages: [
+                    {
+                        type: 'text',
+                        text: message
+                    }
+                ]
+            })
+        }, (err, res, body) => {
+            console.log('status = ' + res.statusCode);
+            resolve(true)
+        });
+        
+    })
+}
+
+function replyMessageImage(message,image,replyToken){
+    return new Promise((resolve,reject) => {
+        request.post({
+            url: LINE_MESSAGING_API,
+            headers: line_header,
+            body: JSON.stringify({
+                replyToken: replyToken,
+                messages: [
+                    {
+                        type: 'text',
+                        text: message
+                    },
+                    {
+                        type: 'image',
+                        originalContentUrl: image,
+                        previewImageUrl: image
+                    }
+                ]
+            })
+        }, (err, res, body) => {
+            console.log('status = ' + res.statusCode);
+            resolve(true)
+        });
+        
+    })
 }
 
 function notifyMessageLine(message){
