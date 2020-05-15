@@ -80,8 +80,8 @@ app.post('/:shop', (req, res) => {
         console.log('res = ' + res);
         console.log('body = ' + body);
         console.log('err = ' + err);
-        res.json(200)
     });
+    res.json(200)
 })
 
 // app.post('/:shop', (req, res) => {
