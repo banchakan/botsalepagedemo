@@ -33,3 +33,5 @@ app.post('/:shop', (req, res) => {
         res.json(200)
     });
 })
+
+app.listen(port)
