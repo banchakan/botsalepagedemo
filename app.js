@@ -199,6 +199,7 @@ function getPomasterById(poid){
 
 //- Create String
 function createStringNotify(po){
+    console.log("notify => ", JSON.stringify(po))
     let pickupDate = new Date(`${po.pickupTime}`)
     let title = `New Order No. ${po.id}\n`
     let code = `รหัส: ${po.poCode}\n`
