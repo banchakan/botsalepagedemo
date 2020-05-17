@@ -236,14 +236,22 @@ function replyMessage(replyToken, jsonMessage){
     });
 }
 
+function checkTyprPay(payTypeName){
+    switch(payTypeName){
+        case 'CASH' : return 'เงินสด';
+        case 'TRANSFER': return 'โอนเงิน';
+        default: return 'ไม่ระบุ';
+    }
+}
+
 function getFlexMessageTemplate(poMaster){
     let shopLogo = 'https://lh3.googleusercontent.com/proxy/VrqNRk4IHuiKVk_YidL-SLrzYesSbQadagSi9C_Gir6F-MMoJw5_7ZmIgJxvMMQecleONpzDE0RPc-xtqCLo1X0yQOYtFvfe1puiX0hCblBuu9tNnJQ'
     let poId = poMaster.id
-    let payType = checkTyprPay(poMaster.salePage.mapPayType[0].payType.payTypeId)
+    let payType = checkTyprPay(poMaster.salePage.mapPayType[0].payType.payTypeName)
     let comment = poMaster.poComment
     let total = poMaster.poSumAll
     let productList = poMaster.poDetails
-    let date = new Date(poMaster.pickUpTime+'')
+    let date = new Date(poMaster.pickUpTime)
     let h = date.getHours().toString()
     let m = date.getMinutes().toString()
     let pickup_time = `${h.padStart(2, '0')}:${m.padStart(2, '0')}`
