@@ -215,7 +215,7 @@ function createStringNotify(po){
 
     if(po.poComment){
         comment = ``
-        message = `${message}หมายเหตุ * ${po.poComment}\n`
+        message = `${message}หมายเหตุ - ${po.poComment}\n`
     }
     message = `${message}${sum}`
     console.log("Message notify => ", message)
@@ -247,6 +247,7 @@ function checkTyprPay(payTypeName){
 function getFlexMessageTemplate(poMaster){
     let shopLogo = 'https://lh3.googleusercontent.com/proxy/VrqNRk4IHuiKVk_YidL-SLrzYesSbQadagSi9C_Gir6F-MMoJw5_7ZmIgJxvMMQecleONpzDE0RPc-xtqCLo1X0yQOYtFvfe1puiX0hCblBuu9tNnJQ'
     let poId = poMaster.id
+    let orderCode = poMaster.poCode
     let payType = checkTyprPay(poMaster.salePage.mapPayType[0].payType.payTypeName)
     let comment = poMaster.poComment
     let total = poMaster.poSumAll
@@ -378,7 +379,7 @@ function getFlexMessageTemplate(poMaster){
                                 contents: [
                                     {
                                         type: "text",
-                                        text: "ออร์เดอร์",
+                                        text: "ออร์เดอร์ที่",
                                         flex: 2,
                                         size: "sm",
                                         color: "#AAAAAA"
@@ -386,6 +387,28 @@ function getFlexMessageTemplate(poMaster){
                                     {
                                         type: "text",
                                         text: `${poId}`,
+                                        flex: 4,
+                                        size: "sm",
+                                        color: "#666666",
+                                        wrap: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: "box",
+                                layout: "baseline",
+                                spacing: "sm",
+                                contents: [
+                                    {
+                                        type: "text",
+                                        text: "รหัสออร์เดอร์",
+                                        flex: 2,
+                                        size: "sm",
+                                        color: "#AAAAAA"
+                                    },
+                                    {
+                                        type: "text",
+                                        text: `${orderCode}`,
                                         flex: 4,
                                         size: "sm",
                                         color: "#666666",
