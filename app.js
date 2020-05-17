@@ -199,12 +199,12 @@ function getPomasterById(poid){
 
 //- Create String
 function createStringNotify(po){
-    let pickupDate = new Date(`${po.pickupTime}`)
+    let pickupDate = new Date(po.pickUpTime)
+    let pickupTime = `เวลารับสินค้า: ${pickupDate.getDate()}/${pickupDate.getMonth()+1}/${pickupDate.getFullYear()} ${pickupDate.getHours()}:${pickupDate.getMinutes()}\n`
     let title = `New Order No. ${po.id}\n`
     let code = `รหัส: ${po.poCode}\n`
-    let pickupTime = `${pickupDate.getDate()}/${pickupDate.getMonth()+1}/${pickupDate.getFullYear()} ${pickupDate.getHours()}:${pickupDate.getMinutes()}\n`
-    let name = `${po.customer.customerFullName}\n`
-    let phone = `${po.customer.customerPhone}\n`
+    let name = `ชื่อ: ${po.customer.customerFullName}\n`
+    let phone = `เบอร์โทร: ${po.customer.customerPhone}\n`
     let sum = `รวม ${po.poSumAll} บาท`
     let order = '**สินค้า\n'
     po.poDetails.forEach((p,i) => {
