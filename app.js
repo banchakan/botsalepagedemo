@@ -98,7 +98,7 @@ function checkMessage(msg){
                 let poid = getPomasterId(msg.text)
                 getPomasterById(poid).then(opj_pomaster => {
                     //พบรายการสั่งซื้อใหม่
-                    resolve({type: 'order', data: opj_pomaster.data})
+                    resolve({type: 'order', data: opj_pomaster})
                 }).catch(err => {
                     //มีปัญหา ดูที่ getPomasterById()
                     reject('get po master error')
@@ -185,7 +185,7 @@ function getPomasterById(poid){
         api.get(`/pomaster/pomaster?id=${poid}`).then(opj_pomaster => {
             if(opj_pomaster.data.poStatus.id === 1){
                 //พบรายการสั่งซื้อใหม่
-                resolve(opj_pomaster)
+                resolve(opj_pomaster.data)
             }else{
                 //พบการสั่งซื้อแต่สถานะ ไม่ใช่ ออเดอร์ใหม่
                 reject('status not start')
