@@ -35,8 +35,8 @@ app.post('/:shop', (req, res) => {
                         //การส่งข้อความไปยังกลุ่ม admin มีปัญหา
                         let model = {
                             type: 'text',
-                            text: `ร้าน ${opj_pomaster.salePage.shop.shopName} ไม่สามารถรับออร์เดอร์ได้ในขณะนี้ ขอขอบ คุณ${opj_pomaster.customer.customerFullName} ที่ต้องการใช้บริการ ทางร้านจะเปิดรับออร์เดอร์ในภายหลัง`
-                            //-text: `${err.toString()}`
+                            //text: `ร้าน ${opj_pomaster.salePage.shop.shopName} ไม่สามารถรับออร์เดอร์ได้ในขณะนี้ ขอขอบ คุณ${opj_pomaster.customer.customerFullName} ที่ต้องการใช้บริการ ทางร้านจะเปิดรับออร์เดอร์ในภายหลัง`
+                            text: `${err.toString()}`
                         }
                         replyMessage(req.body.events[0].replyToken, model)
                     })
@@ -199,7 +199,6 @@ function getPomasterById(poid){
 
 //- Create String
 function createStringNotify(po){
-    console.log("notify => ", JSON.stringify(po))
     let pickupDate = new Date(`${po.pickupTime}`)
     let title = `New Order No. ${po.id}\n`
     let code = `รหัส: ${po.poCode}\n`
@@ -219,6 +218,7 @@ function createStringNotify(po){
         message = `${message}หมายเหตุ * ${po.poComment}\n`
     }
     message = `${message}${sum}`
+    console.log("Message notify => ", message)
     return message
 }
 
