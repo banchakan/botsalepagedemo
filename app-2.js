@@ -128,11 +128,7 @@ function replyMessage(body){
 function checkMessage(msg){
     return new Promise((resolve,reject) => {
         if(msg.type === 'text'){
-            if(msg.text === 'จองโต๊ะ'){
-                resolve({type: 'reserve', data: null})
-            }else if(msg.text === 'โปรโมชัน'){
-                resolve({type: 'promotion', data: null})
-            }else if(msg.text.includes('New Order No.')){
+            if(msg.text.includes('New Order No.')){
                 const poid = getPomasterId(msg.text)
                 api.get(`/pomaster/pomaster?id=${poid}`).then(opj_pomaster => {
                     if(opj_pomaster.data.poStatus.id === 1){
@@ -146,6 +142,10 @@ function checkMessage(msg){
                     //ไม่พบรายการสั่งซื้อ
                     reject('order not found')
                 })
+            }else if(msg.type === 'ยกเลิก'){
+
+            }else if(msg.type === 'ยืนยัน'){
+                
             }else{
                 //ข้อความอื่น ๆ
                 reject('other text')
