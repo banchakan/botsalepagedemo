@@ -43,9 +43,16 @@ function replyMessage(replyToken, jsonMessage){
     });
 }
 
-function getContent(messageId){
-    axios.get(`https://api.line.me/v2/bot/message/${messageId}/content`).then(resp => {
+async  function getContent(messageId){
+    const config = {
+        method: 'get',
+        url: `https://api.line.me/v2/bot/message/${messageId}/content`,
+        headers: {
+            'Authorization': 'Bearer {XdnwLY7GgF/eWd1Uy8nPCThmPtS9DfxU9wJU/MErEz3NwmCJ8TGX6Op35C4CczUTEHY1rlrTEzaiETLiqevZgdgiYk9Ds04TeYPEWXs2TqEqfKiGb3GqsOC+ovynf4mXVFFVbCLftNUC35+SgEuMdQdB04t89/1O/w1cDnyilFU=}'
+        }
+    }
 
-    console.log("DATA CONTENT >>> " , resp.data);
-});
+    let res = await axios(config)
+
+    console.log("DATA CONTENT >>> " , res);
 }
