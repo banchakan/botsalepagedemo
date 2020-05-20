@@ -16,7 +16,7 @@ app.use(bodyParser.json())
 
 app.post('/webhook', (req, res) => {
     if(req.body.events[0].message.type === 'image'){
-        getContent(req.body.events[0].message.id)
+        getContent(req.body.events[0].replyToken, req.body.events[0].message.id)
     }else{
         let model = {
             type: 'text',
@@ -43,7 +43,7 @@ function replyMessage(replyToken, jsonMessage){
     });
 }
 
-async  function getContent(messageId){
+async  function getContent(replyToken , messageId){
     const config = {
         method: 'get',
         url: `https://api.line.me/v2/bot/message/${messageId}/content`,
@@ -53,6 +53,12 @@ async  function getContent(messageId){
     }
 
     let res = await axios(config)
+
+    let model = {
+        type: 'text',
+        text: `${res.data}`
+    }
+    replyMessage(replyToken, model)
 
     console.log("DATA CONTENT >>> " , res);
 }
